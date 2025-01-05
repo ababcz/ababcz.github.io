@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Scanner with Google Forms</title>
+  <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    #reader {
+      width: 300px;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>QR Code Scanner</h1>
+  <div id="reader"></div>
+  <p id="result">Scan a QR code...</p>
+
+  <script>
+    // Google Forms URL (replace with your own form's URL)
+    const googleFormURL = "https://docs.google.com/forms/d/e/YOUR_FORM_ID_HERE/formResponse";
+    const entryField = "entry.1234567890"; // Replace with your field's entry ID
+
+    function sendToGoogleForms(qrCode) {
+      const formData = new URLSearchParams();
+      formData.append(entryField, qrCode);
+
+      fetch(googleFormURL, {
+        method: "POST",
+        body: formData,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      })
+      .then(response => {
+        if (response.ok) {
+          document.getElementById("result").textContent = "Successfully submitted!";
+        } else {
+          document.getElementById("result").textContent = "Failed to submit.";
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        document.getElementById("result").textContent = "Error occurred.";
+      });
+    }
+
+    // Initialize QR code scanner
+    const html5QrCode = new Html5Qrcode("reader");
+    Html5Qrcode.getCameras().then(cameras => {
+      if (cameras && cameras.length) {
+        const cameraId = cameras[0].id;
+        html5QrCode.start(cameraId, { fps: 10, qrbox: 250 },
+          qrCodeMessage => {
+            document.getElementById("result").textContent = `Scanned: ${qrCodeMessage}`;
+            sendToGoogleForms(qrCodeMessage);
+            html5QrCode.stop();
+          },
+          errorMessage => {
+            console.warn(errorMessage);
+          }
+        );
+      }
+    }).catch(err => {
+      console.error("Error initializing QR code scanner:", err);
+    });
+  </script>
+</body>
+</html>
