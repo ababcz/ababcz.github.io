@@ -1,80 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QR Scanner with Google Forms</title>
-  <!-- Odkaz na knihovnu html5-qrcode -->
-  <script src="https://cdn.jsdelivr.net/npm/html5-qrcode/minified/html5-qrcode.min.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-    }
-    #reader {
-      width: 300px;
-      margin: auto;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <!-- Načtení html5-qrcode z jsDelivr -->
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <style>
+        #qr-reader {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+    </style>
 </head>
 <body>
-  <h1>QR Code Scanner</h1>
-  <div id="reader"></div>
-  <p id="result">Scan a QR code...</p>
+    <h1>QR Code Scanner</h1>
+    <div id="qr-reader"></div>
+    <div id="qr-reader-results"></div>
 
-  <script>
-    const googleFormURL = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSeJk7hWrGRwvjLSYLoN8LnpFspu1e25g0IZAWdeBZFC72iQRg/formResponse";
-    const entryField = "entry.1392807745";
+    <script>
+        const googleFormUrl = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSeJk7hWrGRwvjLSYLoN8LnpFspu1e25g0IZAWdeBZFC72iQRg/formResponse?entry.1392807745=";
 
-    function sendToGoogleForms(qrCode) {
-      const formData = new URLSearchParams();
-      formData.append(entryField, qrCode);
+        function onScanSuccess(decodedText, decodedResult) {
+            console.log(`QR Code detected: ${decodedText}`);
+            const resultDiv = document.getElementById("qr-reader-results");
 
-      fetch(googleFormURL, {
-        method: "POST",
-        body: formData,
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      })
-      .then(response => {
-        if (response.ok || response.status === 200) {
-          document.getElementById("result").textContent = "QR Code sent successfully!";
-        } else {
-          document.getElementById("result").textContent = "Failed to send QR Code.";
+            // Zobrazit výsledek
+            resultDiv.innerHTML = `<p>QR kód: ${decodedText}</p>`;
+
+            // Odeslání dat do Google Forms pomocí GET
+            fetch(googleFormUrl + encodeURIComponent(decodedText), { method: 'GET' })
+                .then(() => alert("QR kód byl odeslán: " + decodedText))
+                .catch(err => console.error("Chyba při odesílání:", err));
         }
-      })
-      .catch(error => {
-        console.error("Error:", error);
-        document.getElementById("result").textContent = "An error occurred.";
-      });
-    }
 
-    const html5QrCode = new Html5Qrcode("reader");
+        function onScanFailure(error) {
+            console.warn(`QR Code scan failed: ${error}`);
+        }
 
-    Html5Qrcode.getCameras().then(cameras => {
-      if (cameras && cameras.length) {
-        const cameraId = cameras[0].id;
-
-        html5QrCode.start(
-          cameraId,
-          { fps: 10, qrbox: 250 },
-          qrCodeMessage => {
-            document.getElementById("result").textContent = `Scanned: ${qrCodeMessage}`;
-            sendToGoogleForms(qrCodeMessage);
-            html5QrCode.stop();
-          },
-          errorMessage => {
-            console.warn("QR Code scan error:", errorMessage);
-          }
-        );
-      } else {
-        document.getElementById("result").textContent = "No cameras found.";
-      }
-    }).catch(err => {
-      console.error("Error initializing camera:", err);
-      document.getElementById("result").textContent = "Failed to initialize camera.";
-    });
-  </script>
+        // Inicializace html5-qrcode
+        const qrCodeScanner = new Html5Qrcode("qr-reader");
+        qrCodeScanner.start(
+            { facingMode: "environment" }, // Použití zadní kamery
+            {
+                fps: 10,    // Rychlost skenování
+                qrbox: 250  // Velikost skenovacího okna
+            },
+            onScanSuccess,
+            onScanFailure
+        ).catch(err => console.error("Chyba při inicializaci:", err));
+    </script>
 </body>
 </html>
