@@ -22,9 +22,8 @@
   <p id="result">Scan a QR code...</p>
 
   <script>
-    // Adresa formuláře Google Forms
     const googleFormURL = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSeJk7hWrGRwvjLSYLoN8LnpFspu1e25g0IZAWdeBZFC72iQRg/formResponse";
-    const entryField = "entry.1392807745"; // ID pole formuláře
+    const entryField = "entry.1392807745"; // Nahraďte vaším ID pole
 
     function sendToGoogleForms(qrCode) {
       const formData = new URLSearchParams();
@@ -38,7 +37,7 @@
         },
       })
       .then(response => {
-        if (response.ok || response.status === 200 || response.status === 302) {
+        if (response.ok || response.status === 302) {
           document.getElementById("result").textContent = "QR Code sent successfully!";
         } else {
           document.getElementById("result").textContent = "Failed to send QR Code.";
@@ -50,24 +49,31 @@
       });
     }
 
-    // Inicializace QR skeneru
     const html5QrCode = new Html5Qrcode("reader");
+
+    // Inicializace QR skeneru
     Html5Qrcode.getCameras().then(cameras => {
       if (cameras && cameras.length) {
         const cameraId = cameras[0].id;
-        html5QrCode.start(cameraId, { fps: 10, qrbox: 250 },
+
+        html5QrCode.start(
+          cameraId,
+          { fps: 10, qrbox: 250 },
           qrCodeMessage => {
             document.getElementById("result").textContent = `Scanned: ${qrCodeMessage}`;
-            sendToGoogleForms(qrCodeMessage);
-            html5QrCode.stop();
+            sendToGoogleForms(qrCodeMessage); // Odeslat QR kód do Google Forms
+            html5QrCode.stop(); // Zastavit skener
           },
           errorMessage => {
-            console.warn(errorMessage);
+            console.warn("QR Code scan error:", errorMessage);
           }
         );
+      } else {
+        document.getElementById("result").textContent = "No cameras found.";
       }
     }).catch(err => {
-      console.error("Error initializing QR code scanner:", err);
+      console.error("Error initializing camera:", err);
+      document.getElementById("result").textContent = "Failed to initialize camera.";
     });
   </script>
 </body>
