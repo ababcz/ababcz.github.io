@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QR Scanner with Google Forms</title>
-  <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+  <!-- Odkaz na knihovnu html5-qrcode -->
+  <script src="https://cdn.jsdelivr.net/npm/html5-qrcode/minified/html5-qrcode.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -23,7 +24,7 @@
 
   <script>
     const googleFormURL = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSeJk7hWrGRwvjLSYLoN8LnpFspu1e25g0IZAWdeBZFC72iQRg/formResponse";
-    const entryField = "entry.1392807745"; // Nahraďte vaším ID pole
+    const entryField = "entry.1392807745";
 
     function sendToGoogleForms(qrCode) {
       const formData = new URLSearchParams();
@@ -51,7 +52,6 @@
 
     const html5QrCode = new Html5Qrcode("reader");
 
-    // Inicializace QR skeneru
     Html5Qrcode.getCameras().then(cameras => {
       if (cameras && cameras.length) {
         const cameraId = cameras[0].id;
@@ -61,8 +61,8 @@
           { fps: 10, qrbox: 250 },
           qrCodeMessage => {
             document.getElementById("result").textContent = `Scanned: ${qrCodeMessage}`;
-            sendToGoogleForms(qrCodeMessage); // Odeslat QR kód do Google Forms
-            html5QrCode.stop(); // Zastavit skener
+            sendToGoogleForms(qrCodeMessage);
+            html5QrCode.stop();
           },
           errorMessage => {
             console.warn("QR Code scan error:", errorMessage);
