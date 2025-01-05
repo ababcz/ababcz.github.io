@@ -38,7 +38,7 @@
         },
       })
       .then(response => {
-        if (response.ok || response.status === 302) {
+        if (response.ok || response.status === 200) {
           document.getElementById("result").textContent = "QR Code sent successfully!";
         } else {
           document.getElementById("result").textContent = "Failed to send QR Code.";
