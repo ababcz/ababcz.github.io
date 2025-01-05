@@ -22,9 +22,9 @@
   <p id="result">Scan a QR code...</p>
 
   <script>
-    // Google Forms URL (replace with your own form's URL)
+    // Adresa formuláře Google Forms
     const googleFormURL = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSeJk7hWrGRwvjLSYLoN8LnpFspu1e25g0IZAWdeBZFC72iQRg/formResponse";
-    const entryField = "entry.1392807745"; // Replace with your field's entry ID
+    const entryField = "entry.1392807745"; // ID pole formuláře
 
     function sendToGoogleForms(qrCode) {
       const formData = new URLSearchParams();
@@ -38,19 +38,19 @@
         },
       })
       .then(response => {
-        if (response.ok) {
-          document.getElementById("result").textContent = "Successfully submitted!";
+        if (response.ok || response.status === 200 || response.status === 302) {
+          document.getElementById("result").textContent = "QR Code sent successfully!";
         } else {
-          document.getElementById("result").textContent = "Failed to submit.";
+          document.getElementById("result").textContent = "Failed to send QR Code.";
         }
       })
       .catch(error => {
         console.error("Error:", error);
-        document.getElementById("result").textContent = "Error occurred.";
+        document.getElementById("result").textContent = "An error occurred.";
       });
     }
 
-    // Initialize QR code scanner
+    // Inicializace QR skeneru
     const html5QrCode = new Html5Qrcode("reader");
     Html5Qrcode.getCameras().then(cameras => {
       if (cameras && cameras.length) {
