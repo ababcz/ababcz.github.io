@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Scanner</title>
-    <!-- Načtení html5-qrcode z jsDelivr -->
     <script src="https://cdn.jsdelivr.net/npm/html5-qrcode/minified/html5-qrcode.min.js"></script>
     <style>
         #qr-reader {
@@ -19,20 +18,37 @@
     <div id="qr-reader"></div>
     <div id="qr-reader-results"></div>
 
+    <!-- Zvukový soubor -->
+    <audio id="beep-sound" src="https://www.soundjay.com/button/beep-07.wav"></audio>
+
     <script>
         const googleFormUrl = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSeJk7hWrGRwvjLSYLoN8LnpFspu1e25g0IZAWdeBZFC72iQRg/formResponse?entry.1392807745=";
+
+        let lastScannedCode = null; // Poslední naskenovaný QR kód
 
         function onScanSuccess(decodedText, decodedResult) {
             console.log(`QR Code detected: ${decodedText}`);
             const resultDiv = document.getElementById("qr-reader-results");
+            const beepSound = document.getElementById("beep-sound");
 
-            // Zobrazit výsledek
-            resultDiv.innerHTML = `<p>QR kód: ${decodedText}</p>`;
+            // Porovnání s posledním naskenovaným kódem
+            if (decodedText !== lastScannedCode) {
+                lastScannedCode = decodedText; // Uložit aktuální kód
 
-            // Odeslání dat do Google Forms pomocí GET
-            fetch(googleFormUrl + encodeURIComponent(decodedText), { method: 'GET' })
-                .then(() => alert("QR kód byl odeslán: " + decodedText))
-                .catch(err => console.error("Chyba při odesílání:", err));
+                // Zobrazit výsledek
+                resultDiv.innerHTML = `<p>QR kód: ${decodedText}</p>`;
+
+                // Odeslání dat do Google Forms pomocí GET
+                fetch(googleFormUrl + encodeURIComponent(decodedText), { method: 'GET' })
+                    .then(() => {
+                        // Přehraje zvukové upozornění
+                        beepSound.play();
+                        alert("QR kód byl odeslán: " + decodedText);
+                    })
+                    .catch(err => console.error("Chyba při odesílání:", err));
+            } else {
+                console.log("QR kód je stejný jako předchozí, nic neodesílám.");
+            }
         }
 
         function onScanFailure(error) {
