@@ -57,20 +57,13 @@
         }
 
         // Inicializace QR skeneru bez specifikace `facingMode`
-        const qrCodeScanner = new Html5Qrcode("qr-reader");
-
-        qrCodeScanner.start(
-            {},  // Bez specifikace kamery (výchozí chování)
+        const qrCodeScanner = new Html5Qrcode("qr-reader",
             {
                 fps: 10,    // Rychlost skenování (FPS)
                 qrbox: 250  // Velikost skenovacího okna
-            },
-            onScanSuccess,
-            onScanFailure
-        ).catch(err => {
-            console.error("Chyba při inicializaci QR skeneru:", err);
-            alert("Nepodařilo se připojit ke kameře. Zkontrolujte oprávnění pro kameru v nastavení prohlížeče.");
-        });
+            });
+        html5QrcodeScanner.render(onScanSuccess, onScanError);
+  
     </script>
 </body>
 </html>
