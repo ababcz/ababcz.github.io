@@ -19,7 +19,7 @@
     <div id="qr-reader-results"></div>
 
     <script>
-        const googleFormUrl = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSeJk7hWrGRwvjLSYLoN8LnpFspu1e25g0IZAWdeBZFC72iQRg/formResponse?entry.1392807745=";
+        const googleFormUrl = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSeJk7hWrGRwvjLSYLoN8LnpFspu1e25g0IZAWdeBZFC72iQRg/formResponse";  // URL bez GET parametru
 
         let lastScannedCode = null;
 
@@ -41,30 +41,32 @@
                 lastScannedCode = decodedText;
                 resultDiv.innerHTML = `<p>Nalezený QR kód: ${decodedText}</p>`;
 
-                fetch(googleFormUrl + encodeURIComponent(decodedText), { method: 'GET' })
-                    .then(() => {
-                        playBeep();
-                        console.log("QR kód byl úspěšně odeslán.");
-                    })
-                    .catch(err => console.error("Chyba při odesílání:", err));
+                fetch(googleFormUrl, {
+                    method: 'POST',       // Metoda POST
+                    mode: 'no-cors',      // Režim no-cors
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',  // Formát dat
+                    },
+                    body: `entry.1392807745=${encodeURIComponent(decodedText)}`  // Data pro odeslání
+                })
+                .then(() => {
+                    playBeep();
+                    console.log("QR kód byl úspěšně odeslán.");
+                })
+                .catch(err => console.error("Chyba při odesílání:", err));
             } else {
                 console.log("QR kód je stejný jako předchozí, odeslání se vynechává.");
             }
         }
 
-        function onScanFailure(error) {
-            console.warn(`Chyba při skenování QR kódu: ${error}`);
-        }
-
         // Inicializace QR skeneru bez specifikace `facingMode`
-        const qrCodeScanner = new Html5QrcodeScanner("qr-reader",
+        const qrCodeScanner = new Html5QrcodeScanner("qr-reader", 
             {
                 fps: 10,    // Rychlost skenování (FPS)
                 qrbox: 250  // Velikost skenovacího okna
             });
-        //qrCodeScanner.render(onScanSuccess, onScanFailure);\
-         qrCodeScanner.render(onScanSuccess);
-          
+
+        qrCodeScanner.render(onScanSuccess);  // Pouze funkce onScanSuccess
     </script>
 </body>
 </html>
