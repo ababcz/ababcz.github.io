@@ -18,18 +18,25 @@
     <div id="qr-reader"></div>
     <div id="qr-reader-results"></div>
 
-    <!-- Zvukový soubor -->
-    <audio id="beep-sound" src="https://www.soundjay.com/button/beep-07.wav"></audio>
-
     <script>
         const googleFormUrl = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSeJk7hWrGRwvjLSYLoN8LnpFspu1e25g0IZAWdeBZFC72iQRg/formResponse?entry.1392807745=";
 
         let lastScannedCode = null; // Poslední naskenovaný QR kód
 
+        // Funkce pro přehrání zvuku
+        function playBeep() {
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = context.createOscillator();
+            oscillator.type = "sine"; // Typ zvuku (sinusová vlna)
+            oscillator.frequency.setValueAtTime(440, context.currentTime); // Frekvence (440 Hz = standardní tón A)
+            oscillator.connect(context.destination);
+            oscillator.start();
+            oscillator.stop(context.currentTime + 0.1); // Zvuk trvá 0.1 sekundy
+        }
+
         function onScanSuccess(decodedText, decodedResult) {
             console.log(`QR Code detected: ${decodedText}`);
             const resultDiv = document.getElementById("qr-reader-results");
-            const beepSound = document.getElementById("beep-sound");
 
             // Porovnání s posledním naskenovaným kódem
             if (decodedText !== lastScannedCode) {
@@ -41,8 +48,7 @@
                 // Odeslání dat do Google Forms pomocí GET
                 fetch(googleFormUrl + encodeURIComponent(decodedText), { method: 'GET' })
                     .then(() => {
-                        // Přehraje zvukové upozornění
-                        beepSound.play();
+                        playBeep(); // Přehraje pípnutí při úspěšném odeslání
                         alert("QR kód byl odeslán: " + decodedText);
                     })
                     .catch(err => console.error("Chyba při odesílání:", err));
