@@ -19,37 +19,31 @@
     <div id="qr-reader-results"></div>
 
     <script>
-        // URL Google Forms pro odeslání QR kódu
         const googleFormUrl = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSeJk7hWrGRwvjLSYLoN8LnpFspu1e25g0IZAWdeBZFC72iQRg/formResponse?entry.1392807745=";
 
-        // Poslední naskenovaný QR kód
         let lastScannedCode = null;
 
-        // Funkce pro přehrání pípnutí
         function playBeep() {
             const context = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = context.createOscillator();
             oscillator.type = "sine";
-            oscillator.frequency.setValueAtTime(440, context.currentTime); // Frekvence: 440 Hz
+            oscillator.frequency.setValueAtTime(440, context.currentTime);
             oscillator.connect(context.destination);
             oscillator.start();
-            oscillator.stop(context.currentTime + 0.1); // Zvuk trvá 0.1 sekundy
+            oscillator.stop(context.currentTime + 0.1);
         }
 
-        // Funkce při úspěšném načtení QR kódu
         function onScanSuccess(decodedText, decodedResult) {
             console.log(`QR Code detected: ${decodedText}`);
             const resultDiv = document.getElementById("qr-reader-results");
 
-            // Pokud je nový kód jiný než poslední
             if (decodedText !== lastScannedCode) {
-                lastScannedCode = decodedText; // Uložit aktuální kód
+                lastScannedCode = decodedText;
                 resultDiv.innerHTML = `<p>Nalezený QR kód: ${decodedText}</p>`;
 
-                // Odeslat kód do Google Forms
                 fetch(googleFormUrl + encodeURIComponent(decodedText), { method: 'GET' })
                     .then(() => {
-                        playBeep(); // Přehrát zvuk
+                        playBeep();
                         console.log("QR kód byl úspěšně odeslán.");
                     })
                     .catch(err => console.error("Chyba při odesílání:", err));
@@ -58,22 +52,25 @@
             }
         }
 
-        // Funkce při selhání načtení QR kódu
         function onScanFailure(error) {
             console.warn(`Chyba při skenování QR kódu: ${error}`);
         }
 
-        // Inicializace HTML5 QR Code Scanneru
+        // Inicializace QR skeneru bez specifikace `facingMode`
         const qrCodeScanner = new Html5Qrcode("qr-reader");
+
         qrCodeScanner.start(
-            { facingMode: "environment" }, // Použití zadní kamery
+            {},  // Bez specifikace kamery (výchozí chování)
             {
                 fps: 10,    // Rychlost skenování (FPS)
                 qrbox: 250  // Velikost skenovacího okna
             },
             onScanSuccess,
             onScanFailure
-        ).catch(err => console.error("Chyba při inicializaci QR skeneru:", err));
+        ).catch(err => {
+            console.error("Chyba při inicializaci QR skeneru:", err);
+            alert("Nepodařilo se připojit ke kameře. Zkontrolujte oprávnění pro kameru v nastavení prohlížeče.");
+        });
     </script>
 </body>
 </html>
