@@ -23,11 +23,11 @@
 
         let lastScannedCode = null;
 
-        function playBeep() {
+        function playBeep(frequency = 440) {
             const context = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = context.createOscillator();
             oscillator.type = "sine";
-            oscillator.frequency.setValueAtTime(440, context.currentTime);
+            oscillator.frequency.setValueAtTime(frequency, context.currentTime); // Nastavení frekvence
             oscillator.connect(context.destination);
             oscillator.start();
             oscillator.stop(context.currentTime + 0.1);
@@ -41,6 +41,8 @@
                 lastScannedCode = decodedText;
                 resultDiv.innerHTML = `<p>Nalezený QR kód: ${decodedText}</p>`;
 
+                playBeep(440);  // Zavoláme playBeep() s nižší frekvencí před odesláním
+
                 fetch(googleFormUrl, {
                     method: 'POST',       // Metoda POST
                     mode: 'no-cors',      // Režim no-cors
@@ -50,7 +52,7 @@
                     body: `entry.1392807745=${encodeURIComponent(decodedText)}`  // Data pro odeslání
                 })
                 .then(() => {
-                    playBeep();
+                    playBeep(880);  // Zavoláme playBeep() s vyšší frekvencí po úspěšném odeslání
                     console.log("QR kód byl úspěšně odeslán.");
                 })
                 .catch(err => console.error("Chyba při odesílání:", err));
