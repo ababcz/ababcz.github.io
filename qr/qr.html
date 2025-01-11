@@ -57,7 +57,7 @@
         }
 
         // Inicializace QR skeneru bez specifikace `facingMode`
-        const qrCodeScanner = new Html5Qrcode("qr-reader",
+        const qrCodeScanner = new Html5QrcodeScanner("qr-reader",
             {
                 fps: 10,    // Rychlost skenování (FPS)
                 qrbox: 250  // Velikost skenovacího okna
