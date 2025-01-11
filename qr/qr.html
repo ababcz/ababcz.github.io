@@ -19,59 +19,61 @@
     <div id="qr-reader-results"></div>
 
     <script>
+        // URL Google Forms pro odeslání QR kódu
         const googleFormUrl = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSeJk7hWrGRwvjLSYLoN8LnpFspu1e25g0IZAWdeBZFC72iQRg/formResponse?entry.1392807745=";
 
-        let lastScannedCode = null; // Poslední naskenovaný QR kód
+        // Poslední naskenovaný QR kód
+        let lastScannedCode = null;
 
-        // Funkce pro přehrání zvuku
+        // Funkce pro přehrání pípnutí
         function playBeep() {
             const context = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = context.createOscillator();
-            oscillator.type = "sine"; // Typ zvuku (sinusová vlna)
-            oscillator.frequency.setValueAtTime(440, context.currentTime); // Frekvence (440 Hz = standardní tón A)
+            oscillator.type = "sine";
+            oscillator.frequency.setValueAtTime(440, context.currentTime); // Frekvence: 440 Hz
             oscillator.connect(context.destination);
             oscillator.start();
             oscillator.stop(context.currentTime + 0.1); // Zvuk trvá 0.1 sekundy
         }
 
+        // Funkce při úspěšném načtení QR kódu
         function onScanSuccess(decodedText, decodedResult) {
             console.log(`QR Code detected: ${decodedText}`);
             const resultDiv = document.getElementById("qr-reader-results");
 
-            // Porovnání s posledním naskenovaným kódem
+            // Pokud je nový kód jiný než poslední
             if (decodedText !== lastScannedCode) {
                 lastScannedCode = decodedText; // Uložit aktuální kód
+                resultDiv.innerHTML = `<p>Nalezený QR kód: ${decodedText}</p>`;
 
-                // Zobrazit výsledek
-                resultDiv.innerHTML = `<p>QR kód: ${decodedText}</p>`;
-
-                // Odeslání dat do Google Forms pomocí GET
+                // Odeslat kód do Google Forms
                 fetch(googleFormUrl + encodeURIComponent(decodedText), { method: 'GET' })
                     .then(() => {
-                        playBeep(); // Přehraje pípnutí při úspěšném odeslání
-                        alert("QR kód byl odeslán: " + decodedText);
+                        playBeep(); // Přehrát zvuk
+                        console.log("QR kód byl úspěšně odeslán.");
                     })
                     .catch(err => console.error("Chyba při odesílání:", err));
             } else {
-                console.log("QR kód je stejný jako předchozí, nic neodesílám.");
+                console.log("QR kód je stejný jako předchozí, odeslání se vynechává.");
             }
         }
 
+        // Funkce při selhání načtení QR kódu
         function onScanFailure(error) {
-            console.warn(`QR Code scan failed: ${error}`);
+            console.warn(`Chyba při skenování QR kódu: ${error}`);
         }
 
-        // Inicializace html5-qrcode
+        // Inicializace HTML5 QR Code Scanneru
         const qrCodeScanner = new Html5Qrcode("qr-reader");
         qrCodeScanner.start(
             { facingMode: "environment" }, // Použití zadní kamery
             {
-                fps: 10,    // Rychlost skenování
+                fps: 10,    // Rychlost skenování (FPS)
                 qrbox: 250  // Velikost skenovacího okna
             },
             onScanSuccess,
             onScanFailure
-        ).catch(err => console.error("Chyba při inicializaci:", err));
+        ).catch(err => console.error("Chyba při inicializaci QR skeneru:", err));
     </script>
 </body>
 </html>
